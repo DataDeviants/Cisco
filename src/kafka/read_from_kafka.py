@@ -1,12 +1,17 @@
+import os
 from confluent_kafka import Consumer, KafkaException
 import pandas as pd
 import json
+from dotenv import load_dotenv
+
+# read KAFKA_SERVER from environment variable (from .env file)
+load_dotenv(".env")
 
 c = Consumer(
-    {'bootstrap.servers': 'localhost:29092',
+    {'bootstrap.servers': os.getenv("KAFKA_SERVER", "localhost:29092"),
      'broker.address.family': 'v4',
      'auto.offset.reset': 'earliest',
-        'group.id': 'mygroup'
+     'group.id': 'mygroup'
      })
 
 c.subscribe(['dnaspaces'])

@@ -11,6 +11,8 @@ urllib3 = "*"
 pandas = "*"
 confluent-kafka = "*"
 pyspark = "*"
+pip = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
