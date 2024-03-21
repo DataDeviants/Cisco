@@ -1,14 +1,17 @@
 import requests
 import json
-import datetime
 
-apiKeyFile = open("OLD_KEY.txt")
+apiKeyFile = open("OLD_KEY.txt", "r")
 apiKey = apiKeyFile.read()
 s = requests.Session()
 s.headers = {"X-API-Key": apiKey}
 r = s.get("https://partners.dnaspaces.io/api/partners/v1/firehose/events", stream=True)
 
-jsonfile = open("res/logs.json", 'w+')
+jsonfile = open("res/logs.json", "r+")
+jsonfile.truncate(0)
+
+posfile = open("res/pos.csv", "w+")
+posfile.truncate(0)
 
 myTenantId = "Simulation-Workspaces"
 
@@ -20,16 +23,11 @@ for line in r.iter_lines():
         jsonfile.write(decoded_line + "\n")
         event = json.loads(decoded_line)
         eventType = event["eventType"]
+        if eventType != "IOT_TELEMETRY":
+            print(eventType)
         tenantId = event["partnerTenantId"]
         if tenantId != myTenantId:
             continue
-        time = int(event["recordTimestamp"])
-        print(eventType, time)
-        # time from unix to human readable
-        real_time = datetime.datetime.fromtimestamp(time/1000).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"Time: {real_time}")
-        if eventType != "IOT_TELEMETRY":
-            print(eventType)
         if eventType == "DEVICE_LOCATION_UPDATE":
             deviceLocationUpdate = event["deviceLocationUpdate"]
             xpos = float(deviceLocationUpdate["xPos"])
