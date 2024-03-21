@@ -18,7 +18,7 @@ df = df[df['confidence'] < 100]
 # collect data for each id
 ids = df['id'].unique()
 
-plt.imshow(plt.imread('floor1.png'))
+plt.imshow(plt.imread('res/floor1.png'))
 
 #ids = ids[200:220]
 for id in ids:

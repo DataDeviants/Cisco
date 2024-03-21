@@ -1,7 +1,7 @@
 import requests
 
 
-apiKeyFile = open("API_KEY.txt")
+apiKeyFile = open("SF_KEY.txt")
 apiKey = apiKeyFile.read()
 s = requests.Session()
 s.headers = {'X-API-Key': apiKey}
