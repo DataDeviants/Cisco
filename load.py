@@ -59,26 +59,38 @@ posfile.write("id,time,floorNumber,x,y\n")
 print("Starting Stream")
 for line in r.iter_lines():
   if line:
-    # decodes payload into useable format
-    decoded_line = line.decode('utf-8')
-    event = json.loads(decoded_line)
+    try:
+      decoded_line = line.decode('utf-8')
+      event = json.loads(decoded_line)
 
-    eventType = event['eventType']
-    tenantId = event["partnerTenantId"]
-    #print(eventType)
+      jsonfile.write(str(json.dumps(event, indent=2, sort_keys=True)))
 
-    # writes whole json
-    jsonfile.write(str(json.dumps(event, indent=2, sort_keys=True)))
+      eventType = event['eventType']
+      tenantId = event["partnerTenantId"]
 
-    if eventType == "IOT_TELEMETRY" and tenantId == "Simulation-Workspaces":
-      try:
-        xpos = float(event['iotTelemetry']['detectedPosition']['xPos'])
-        ypos = float(event['iotTelemetry']['detectedPosition']['yPos'])
-        floorNumber = float(event['iotTelemetry']['location']['floorNumber'])
-        time = event['iotTelemetry']['detectedPosition']['lastLocatedTime']
-        deviceId = event['iotTelemetry']['deviceInfo']['deviceId']
+      if eventType == "IOT_TELEMETRY" and tenantId == "Simulation-Workspaces":
+        iotTelemetry = event['iotTelemetry']
+
+        detectedPosition = iotTelemetry['detectedPosition']
+        xpos = float(detectedPosition['xPos'])
+        ypos = float(detectedPosition['yPos'])
+        time = int(detectedPosition['lastLocatedTime'])
+
+        deviceInfo = iotTelemetry['deviceInfo']
+        deviceId = deviceInfo['deviceId']
+
+        location = iotTelemetry['location']
+
+        floorNumber = None
+        while True:
+          if "floorNumber" in location:
+            floorNumber = location['floorNumber']
+            break
+          else:
+            location = location['parent']
+
         posfile.write(f"{deviceId},{time},{floorNumber},{xpos},{ypos}\n")
-      except KeyError as e:
-        print(e)
+    except Exception as e:
+      print(e)
 
 
