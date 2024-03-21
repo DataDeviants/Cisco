@@ -3,3 +3,7 @@ logs.json
 pos.csv
 plot.svg
 plot.png
+
+data/kafka/*
+data/zookeeper/log/*
+data/zookeeper/data/*

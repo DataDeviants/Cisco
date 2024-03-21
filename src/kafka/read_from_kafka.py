@@ -37,7 +37,9 @@ finally:
 
 df = pd.DataFrame(messages)
 
-# make "recordTimestamp" a datetime object
-df['recordTimestamp'] = pd.to_datetime(df['recordTimestamp'])
+print(df.head())
 
-print(df['recordTimestamp']
+# make "recordTimestamp" from unix time a datetime object
+df['recordTimestamp'] = pd.to_datetime(df['recordTimestamp'], unit='ms')
+
+print(df['recordTimestamp'].head())
