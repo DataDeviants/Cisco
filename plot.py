@@ -11,7 +11,6 @@ ids = df['id'].unique()
 # filter out the ids that are stationary (don't move)
 ids = [id for id in ids if len(df[df['id'] == id]) > 10]
 
-plt.imshow(plt.imread('floor.png'))
 
 #ids = ids[200:250]
 for id in ids:
@@ -24,5 +23,5 @@ for id in ids:
     datay = datay * 10
     plt.plot(datax, datay, label=id)
 
-plt.savefig('plot.png')
-
+plt.imshow(plt.imread('floor1.png'))
+plt.savefig('plot.png', dpi=300)
