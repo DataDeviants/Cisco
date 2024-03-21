@@ -18,17 +18,16 @@ df = df[df['confidence'] < 100]
 # collect data for each id
 ids = df['id'].unique()
 
-plt.imshow(plt.imread('floor1.png'))
 
 #ids = ids[200:220]
 for id in ids:
   data = df[df['id'] == id]
-  datax = data['x'].rolling(window=1).mean()
-  datay = data['y'].rolling(window=1).mean()
+  datax = data['x'].rolling(window=5).mean()
+  datay = data['y'].rolling(window=5).mean()
   
   datax = (datax + offsetX) / (width + 2 * offsetX) * imageWidth
   datay = (datay + offsetY) / (length + 2 * offsetY) * imageHeight
   plt.plot(datax, datay, label=id)
 
-plt.imshow(plt.imread('floor1.png'))
+plt.imshow(plt.imread('res/floor1.png'))
 plt.savefig('plot.png', dpi=300)

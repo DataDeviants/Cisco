@@ -8,20 +8,20 @@ posfile.truncate(0)
 # write csv header
 posfile.write("id,time,floorNumber,x,y,confidence,deviceType\n")
 
-myTenantId = "Simulation-Workspaces"
-event_mode = "DEVICE"
+myTenantId = "F7EE24937F9244518E0CBEDEA3BEB05F"
+event_mode = "IOT"
 
 for line in jsonfile.readlines():
   if line:
     try:
       event = json.loads(line)
 
-      jsonfile.write(str(json.dumps(event, indent=2, sort_keys=True)))
-
       eventType = event['eventType']
       tenantId = event["partnerTenantId"]
       if tenantId != myTenantId:
+        print("Not my tenant")
         continue
+      
       if eventType == "DEVICE_LOCATION_UPDATE" and event_mode == "DEVICE":
         deviceLocationUpdate = event["deviceLocationUpdate"]
         xpos = float(deviceLocationUpdate['xPos'])
@@ -29,13 +29,14 @@ for line in jsonfile.readlines():
         time = int(event['recordTimestamp'])
         confidence = deviceLocationUpdate['confidenceFactor']
 
-        deviceId = deviceLocationUpdate['device']['deviceId']
+        deviceId = deviceLocationUpdate['device']['deviceMacAddress']
 
         location = deviceLocationUpdate['location']
         
       elif eventType == "IOT_TELEMETRY" and event_mode == "IOT":
         iotTelemetry = event["iotTelemetry"]
-
+        if "detectedPosition" not in iotTelemetry.keys():
+          continue
         detectedPosition = iotTelemetry['detectedPosition']
         xpos = float(detectedPosition['xPos'])
         ypos = float(detectedPosition['yPos'])
@@ -44,7 +45,7 @@ for line in jsonfile.readlines():
 
         deviceInfo = iotTelemetry['deviceInfo']
         deviceType = deviceInfo['deviceType']
-        deviceId = deviceInfo['deviceId']
+        deviceId = deviceInfo['deviceMacAddress']
 
         location = iotTelemetry['location']
       else:
