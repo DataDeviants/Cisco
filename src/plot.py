@@ -18,7 +18,6 @@ df = df[df['confidence'] < 100]
 # collect data for each id
 ids = df['id'].unique()
 
-
 #ids = ids[200:220]
 for id in ids:
   data = df[df['id'] == id]
