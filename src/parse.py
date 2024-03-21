@@ -2,7 +2,7 @@ import json
 
 jsonfile = open("res/logs.json", 'r+')
 
-posfile = open("res/pos.csv", 'r+')
+posfile = open("res/pos.csv", 'w+')
 posfile.truncate(0)
 
 # write csv header

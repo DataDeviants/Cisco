@@ -7,8 +7,7 @@ s = requests.Session()
 s.headers = {'X-API-Key': apiKey}
 r = s.get('https://partners.dnaspaces.io/api/partners/v1/firehose/events', stream=True)
 
-jsonfile = open("res/logs.json", 'r+')
-jsonfile.truncate(0)
+jsonfile = open("res/logs.json", 'w+')
 
 for line in r.iter_lines():
   if line:
