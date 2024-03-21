@@ -22,6 +22,7 @@
             pyarrow
             scikit-learn
             matplotlib
+            pyspark
 
             jwt
             requests
