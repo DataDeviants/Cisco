@@ -1,2 +1,5 @@
 .direnv
 logs.json
+pos.csv
+plot.svg
+plot.png
