@@ -11,10 +11,18 @@ ids = df['id'].unique()
 # filter out the ids that are stationary (don't move)
 ids = [id for id in ids if len(df[df['id'] == id]) > 10]
 
-ids = ids[200:201]
+plt.imshow(plt.imread('floor.png'))
+
+#ids = ids[200:250]
 for id in ids:
     data = df[df['id'] == id]
-    plt.plot(data['x'], data['y'], label=id)
+    datax = data['x'].rolling(window=30).mean()
+    datay = data['y'].rolling(window=30).mean()
+    
+    # scale x and y by 10
+    datax = datax * 10
+    datay = datay * 10
+    plt.plot(datax, datay, label=id)
 
-plt.savefig('plot.svg')
+plt.savefig('plot.png')
 
