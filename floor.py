@@ -54,3 +54,10 @@ for j, id in enumerate(map_ids):
     # save the image
     with open("floor" + str(j+1) + ".png", "wb") as f:
         f.write(r.content)
+
+    u = s.get(
+        "https://partners.dnaspaces.io/api/partners/v1/maps/" + id
+    )
+    print(u.status_code)
+    with open("floor" + str(j+1) + ".json", "w") as f:
+        f.write(json.dumps(u.json(), indent=4))
