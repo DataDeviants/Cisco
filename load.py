@@ -53,7 +53,7 @@ jsonfile.truncate(0)
 posfile = open("pos.csv", 'r+')
 posfile.truncate(0)
 
-posfile.write("id,x,y\n")
+posfile.write("id,time,floorNumber,x,y\n")
 
 # Jumps through every new event we have through firehose
 print("Starting Stream")
@@ -68,15 +68,16 @@ for line in r.iter_lines():
     #print(eventType)
 
     # writes whole json
-    #jsonfile.write(str(json.dumps(event, indent=2, sort_keys=True)))
+    jsonfile.write(str(json.dumps(event, indent=2, sort_keys=True)))
 
     if eventType == "IOT_TELEMETRY" and tenantId == "Simulation-Workspaces":
       try:
         xpos = float(event['iotTelemetry']['detectedPosition']['xPos'])
         ypos = float(event['iotTelemetry']['detectedPosition']['yPos'])
+        floorNumber = float(event['iotTelemetry']['location']['floorNumber'])
         time = event['iotTelemetry']['detectedPosition']['lastLocatedTime']
         deviceId = event['iotTelemetry']['deviceInfo']['deviceId']
-        posfile.write(f"{deviceId},{time},{xpos},{ypos}\n")
+        posfile.write(f"{deviceId},{time},{floorNumber},{xpos},{ypos}\n")
       except KeyError as e:
         print(e)
 
