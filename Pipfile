@@ -9,6 +9,8 @@ requests = "*"
 pyjwt = "*"
 urllib3 = "*"
 pandas = "*"
+confluent-kafka = "*"
+pyspark = "*"
 
 [dev-packages]
 
