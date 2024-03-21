@@ -4,7 +4,7 @@ import json
 import time
 
 # Configure your Kafka Producer
-p = Producer({'bootstrap.servers': 'localhost:29092',
+p = Producer({'bootstrap.servers': '10.51.4.43:29092',
              'broker.address.family': 'v4'})
 
 s = requests.Session()
