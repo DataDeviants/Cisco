@@ -3,6 +3,7 @@ logs.json
 pos.csv
 plot.svg
 plot.png
+.DS_STORE
 
 data/kafka/*
 data/zookeeper/log/*
