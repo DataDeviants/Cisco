@@ -24,7 +24,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphWidget = pg.PlotWidget()
         self.setCentralWidget(self.graphWidget)
 
-        self.index = 0
+        self.index = 250
         self.x = []
         self.y = []
 
@@ -36,16 +36,17 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.timer = pg.QtCore.QTimer()
         self.timer.timeout.connect(self.update_plot_data)
-        self.timer.start(500)  # Refresh rate ( in this case its 1 sec)
+        self.timer.start(50)  # Refresh rate ( in this case its 1 sec)
 
     def update_plot_data(self):
-        with open ('res/pos.csv', 'r') as f:
+        with open ('dnaspaces_cleaned.csv', 'r') as f:
             try:
                 data = f.readlines()[self.index].split(',')
+                x = [float(data[8])]
+                y = [float(data[9])]
             except:
+                self.index += 1
                 return
-            x = [float(data[0])]
-            y = [float(data[1])]
               
             datax = [(x[0] + offsetX) / (width + 2 * offsetX) * imageWidth]
             datay = [(y[0] + offsetY) / (length + 2 * offsetY) * imageHeight]
