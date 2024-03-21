@@ -53,7 +53,7 @@ jsonfile.truncate(0)
 posfile = open("pos.csv", 'r+')
 posfile.truncate(0)
 
-posfile.write("id,time,floorNumber,x,y\n")
+posfile.write("id,time,floorNumber,x,y,confidence\n")
 
 # Jumps through every new event we have through firehose
 print("Starting Stream")
@@ -75,6 +75,7 @@ for line in r.iter_lines():
         xpos = float(detectedPosition['xPos'])
         ypos = float(detectedPosition['yPos'])
         time = int(detectedPosition['lastLocatedTime'])
+        confidence = detectedPosition['confidenceFactor']
 
         deviceInfo = iotTelemetry['deviceInfo']
         deviceId = deviceInfo['deviceId']
@@ -89,7 +90,7 @@ for line in r.iter_lines():
           else:
             location = location['parent']
 
-        posfile.write(f"{deviceId},{time},{floorNumber},{xpos},{ypos}\n")
+        posfile.write(f"{deviceId},{time},{floorNumber},{xpos},{ypos},{confidence}\n")
     except Exception as e:
       print(e)
 
