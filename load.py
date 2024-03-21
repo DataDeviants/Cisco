@@ -48,28 +48,43 @@ r = s.get(
 
 
 jsonfile = open("logs.json", 'r+')
-jsonfile.truncate(0)
+# jsonfile.truncate(0)
 
 posfile = open("pos.csv", 'r+')
 posfile.truncate(0)
 
-posfile.write("id,time,floorNumber,x,y,confidence\n")
+posfile.write("id,time,floorNumber,x,y,confidence,deviceType\n")
+
+myTenantId = "Simulation-Workspaces"
+
+event_mode = "DEVICE"
 
 # Jumps through every new event we have through firehose
 print("Starting Stream")
-for line in r.iter_lines():
+for line in jsonfile.readlines():
   if line:
     try:
-      decoded_line = line.decode('utf-8')
-      event = json.loads(decoded_line)
+      event = json.loads(line)
 
       jsonfile.write(str(json.dumps(event, indent=2, sort_keys=True)))
 
       eventType = event['eventType']
       tenantId = event["partnerTenantId"]
+      if tenantId != myTenantId:
+        continue
+      if eventType == "DEVICE_LOCATION_UPDATE" and event_mode == "DEVICE":
+        deviceLocationUpdate = event["deviceLocationUpdate"]
+        xpos = float(deviceLocationUpdate['xPos'])
+        ypos = float(deviceLocationUpdate['yPos'])
+        time = int(event['recordTimestamp'])
+        confidence = deviceLocationUpdate['confidenceFactor']
 
-      if eventType == "IOT_TELEMETRY" and tenantId == "Simulation-Workspaces":
-        iotTelemetry = event['iotTelemetry']
+        deviceId = deviceLocationUpdate['device']['deviceId']
+
+        location = deviceLocationUpdate['location']
+        
+      elif eventType == "IOT_TELEMETRY" and event_mode == "IOT":
+        iotTelemetry = event["iotTelemetry"]
 
         detectedPosition = iotTelemetry['detectedPosition']
         xpos = float(detectedPosition['xPos'])
@@ -78,20 +93,30 @@ for line in r.iter_lines():
         confidence = detectedPosition['confidenceFactor']
 
         deviceInfo = iotTelemetry['deviceInfo']
+        deviceType = deviceInfo['deviceType']
         deviceId = deviceInfo['deviceId']
 
         location = iotTelemetry['location']
+      else:
+        if eventType != "DEVICE_LOCATION_UPDATE" and eventType != "IOT_TELEMETRY":
+          print(eventType)
+        continue
 
-        floorNumber = None
-        while True:
-          if "floorNumber" in location:
-            floorNumber = location['floorNumber']
-            break
-          else:
-            location = location['parent']
-
-        posfile.write(f"{deviceId},{time},{floorNumber},{xpos},{ypos},{confidence}\n")
+      floorNumber = None
+      # print(location['inferredLocationTypes'][0])
+      if location['inferredLocationTypes'][0] == "NETWORK":
+        continue
+      while True:
+        if "floorNumber" in location.keys():
+          floorNumber = location['floorNumber']
+          break
+        else:
+          location = location['parent']
+      if deviceId == "device-Gld2dbQFYnTDDzxTJYuP4":
+        print(f"{deviceId},{time},{floorNumber},{xpos},{ypos},{confidence}")
+        print(location['inferredLocationTypes'])
+      posfile.write(f"{deviceId},{time},{floorNumber},{xpos},{ypos},{confidence}\n")
     except Exception as e:
-      print(e)
+      print("Error: " + str(e))
 
 
