@@ -38,9 +38,6 @@ try:
 except:
   apiKey = get_API_Key_and_auth()
 
-# overwrite previous log file
-f = open("logs.json", 'r+')
-f.truncate(0)
 
 # Opens a new HTTP session that we can use to terminate firehose onto
 s = requests.Session()
@@ -48,6 +45,15 @@ s.headers = {'X-API-Key': apiKey}
 r = s.get(
     'https://partners.dnaspaces.io/api/partners/v1/firehose/events', stream=True
   )  # Change this to .io if needed
+
+
+jsonfile = open("logs.json", 'r+')
+jsonfile.truncate(0)
+
+posfile = open("pos.csv", 'r+')
+posfile.truncate(0)
+
+posfile.write("id,x,y\n")
 
 # Jumps through every new event we have through firehose
 print("Starting Stream")
@@ -57,9 +63,21 @@ for line in r.iter_lines():
     decoded_line = line.decode('utf-8')
     event = json.loads(decoded_line)
 
-    # writes every event to the logs.json in readible format
-    f.write(str(json.dumps(json.loads(line), indent=4, sort_keys=True)))
-
-    # gets the event type out the JSON event and prints to screen
     eventType = event['eventType']
-    print(eventType)
+    tenantId = event["partnerTenantId"]
+    #print(eventType)
+
+    # writes whole json
+    #jsonfile.write(str(json.dumps(event, indent=2, sort_keys=True)))
+
+    if eventType == "IOT_TELEMETRY" and tenantId == "Simulation-Workspaces":
+      try:
+        xpos = float(event['iotTelemetry']['detectedPosition']['xPos'])
+        ypos = float(event['iotTelemetry']['detectedPosition']['yPos'])
+        time = event['iotTelemetry']['detectedPosition']['lastLocatedTime']
+        deviceId = event['iotTelemetry']['deviceInfo']['deviceId']
+        posfile.write(f"{deviceId},{time},{xpos},{ypos}\n")
+      except KeyError as e:
+        print(e)
+
+
