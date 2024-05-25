@@ -13,6 +13,10 @@ confluent-kafka = "*"
 pyspark = "*"
 pip = "*"
 python-dotenv = "*"
+osmnx = "*"
+geopandas = "*"
+scipy = "*"
+matplotlib = "*"
 
 [dev-packages]
 

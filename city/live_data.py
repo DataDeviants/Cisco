@@ -10,7 +10,8 @@ from scipy.stats import gaussian_kde
 dt = 0.00001
 normal_offset = 4 * dt
 
-n_agents = 200
+n_agents = 50
+
 
 class Node:
     def __init__(self, id, x, adjacent):
@@ -54,10 +55,12 @@ class Vector2:
     def dot(self, other):
         return self.x * other.x + self.y * other.y
 
-bbox = (47.0478, 47.0459, 8.3047, 8.3080)
-area = ox.graph_from_bbox(bbox=bbox, network_type="drive")
+
+bbox = (52.219275, 52.217527, 21.009359, 21.011603)
+area = ox.graph_from_bbox(bbox=bbox, network_type="walk")
 buildings = ox.geometries_from_bbox(*bbox, tags={"building": True})
-parks = ox.geometries_from_bbox(*bbox, tags={"leisure": "park", "landuse": "grass"})
+parks = ox.geometries_from_bbox(
+    *bbox, tags={"leisure": "park", "landuse": "grass"})
 
 adj = dict()
 for i in area.adjacency():
@@ -98,10 +101,12 @@ def point_on_edge(edge):
     n2 = node_from_id(list(edge)[1])
     return (n1.x - n2.x) * np.random.rand() + n2.x
 
+
 def edge_geometry(edge):
     n1 = node_from_id(list(edge)[0])
     n2 = node_from_id(list(edge)[1])
     return (n1.x.x, n2.x.x), (n1.x.y, n2.x.y)
+
 
 agents = []
 for i in range(n_agents):
@@ -137,6 +142,14 @@ buildings.plot(ax=ax, facecolor="silver", alpha=0.7)
 
 # animate the agents
 
+# remove the axes and frame
+ax.set_xticklabels([])
+ax.set_yticklabels([])
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.spines["bottom"].set_visible(False)
+ax.spines["left"].set_visible(False)
+
 event_node = None
 
 fig2, ax2 = plt.subplots()
@@ -145,10 +158,14 @@ fig2, ax2 = plt.subplots()
 x, y = np.zeros(n_agents), np.zeros(n_agents)
 counts = []
 outfile = open("res.csv", "w")
+
+
 def update(frame):
     global event_node, adjacent_edges
     # print("Frame", frame)
     ax.clear()
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
     parks.plot(ax=ax, facecolor="green")
     buildings.plot(ax=ax, facecolor="silver", alpha=0.7)
 
@@ -164,7 +181,8 @@ def update(frame):
         y[i] = agent.x.y
         outfile.write(f"{frame},{agent.id},{agent.x.x},{agent.x.y}\n")
         speed = agent.v.norm()
-        agent.v = (agent.target_point - agent.x) / (agent.target_point - agent.x).norm() * speed
+        agent.v = (agent.target_point - agent.x) / \
+            (agent.target_point - agent.x).norm() * speed
 
         if (agent.x - v[6].x).norm() < 0.0001:
             count += 1
@@ -208,13 +226,15 @@ def update(frame):
                     + next_dir / next_dir.norm() * normal_offset
                 )
                 agent.target_point = corner
-                agent.edge = edge_from_node_ids([agent.target_node.id, next_node.id])
+                agent.edge = edge_from_node_ids(
+                    [agent.target_node.id, next_node.id])
                 agent.target_node = next_node
                 agent.v = agent.target_point - agent.x
                 agent.v = agent.v / agent.v.norm() * random.uniform(0.7, 1.2)
             elif agent.status == "turning":
                 agent.status = "walking"
-                agent.target_point = (agent.target_node.x + agent.offset - agent.v / agent.v.norm() * normal_offset)
+                agent.target_point = (
+                    agent.target_node.x + agent.offset - agent.v / agent.v.norm() * normal_offset)
                 agent.v = agent.target_point - agent.x
                 agent.v = agent.v / agent.v.norm() * random.uniform(0.7, 1.2)
             else:
@@ -227,35 +247,48 @@ def update(frame):
             adjacent_edges = [
                 edge_from_node_ids([event_node.id, x]) for x in event_node.adjacent
             ]
-            
+
         for agent in agents:
             if agent.edge in adjacent_edges:
                 agent.target_point = event_node.x
             if frame == 10:
                 agent.v *= 1.25
     if frame >= 10:
-        ax.plot(
-            event_node.x.x,
-            event_node.x.y,
-            marker="x",
-            color="r",
-            markersize=10,
-            linewidth=15,
-        )
+        # ax.plot(
+        #     event_node.x.x,
+        #     event_node.x.y,
+        #     marker="x",
+        #     color="r",
+        #     markersize=10,
+        #     linewidth=15,
+        # )
+        pass
 
-    # plot the graph
+        # plot the graph
     for w in v:
-        ax.plot(w.x.x, w.x.y, "ko", alpha=0.5)
+        ax.plot(w.x.x, w.x.y, "ko", alpha=0.2)
         for adj in w.adjacent:
             w2 = next((x for x in v if x.id == adj), None)
-            ax.plot([w.x.x, w2.x.x], [w.x.y, w2.x.y], "k-", alpha=0.3)
+            ax.plot([w.x.x, w2.x.x], [w.x.y, w2.x.y], "k-", alpha=0.2)
 
     # plot the heatmap
     k = gaussian_kde(np.vstack([x, y]), bw_method=0.1)
     xi, yi = np.mgrid[bbox[2]:bbox[3]:100j, bbox[0]:bbox[1]:100j]
     zi = k(np.vstack([xi.flatten(), yi.flatten()]))
-    ax.contourf(xi, yi, zi.reshape(xi.shape), alpha=0.5)
-    
+
+    # normalize the heatmap
+    zi = (zi - zi.min()) / (zi.max() - zi.min())
+
+    # add levels so that 0 density is transparent
+    ax.contourf(
+        xi,
+        yi,
+        zi.reshape(xi.shape),
+        levels=np.linspace(
+            0.2, 1, 10),
+        alpha=0.5
+    )
+
     # new subplot
     counts.append(count)
     ax2.plot(pd.Series(counts).rolling(10).mean(), color="orange")
@@ -266,6 +299,6 @@ def update(frame):
 
 ani = FuncAnimation(fig, update, frames=100, blit=False)
 
-ox.plot_graph(area, ax=ax, node_color="r", node_zorder=3)
+ox.plot_graph(area, ax=ax, node_color="r", node_zorder=3, show=False)
 
 plt.show()
